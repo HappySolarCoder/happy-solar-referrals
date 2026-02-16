@@ -1,35 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { promises as fs } from 'fs';
-import path from 'path';
 
-// Data file path (storing in project root for MVP)
-const DATA_FILE = path.join(process.cwd(), 'referrals.json');
-
-// Initialize data file if it doesn't exist
-async function ensureDataFile() {
-  try {
-    await fs.access(DATA_FILE);
-  } catch {
-    await fs.writeFile(DATA_FILE, JSON.stringify([]));
-  }
-}
-
-// Read referrals from file
-async function readReferrals() {
-  await ensureDataFile();
-  const data = await fs.readFile(DATA_FILE, 'utf-8');
-  return JSON.parse(data);
-}
-
-// Write referrals to file
-async function writeReferrals(referrals: any[]) {
-  await fs.writeFile(DATA_FILE, JSON.stringify(referrals, null, 2));
-}
+// In-memory storage for MVP (will persist during function lifetime)
+// For production, this should be replaced with a database
+let referrals: any[] = [];
 
 // GET - Fetch all referrals (for admin dashboard)
 export async function GET() {
   try {
-    const referrals = await readReferrals();
     return NextResponse.json(referrals);
   } catch (error) {
     console.error('Error reading referrals:', error);
@@ -76,17 +53,12 @@ export async function POST(request: NextRequest) {
       lastContactDate: null
     };
 
-    // Read existing referrals
-    const referrals = await readReferrals();
-    
-    // Add new referral
+    // Add to in-memory storage
     referrals.push(referral);
-    
-    // Write back to file
-    await writeReferrals(referrals);
 
     // TODO: Send confirmation email to referrer
     // TODO: Send Day 0 email to referred lead
+    // TODO: Save to persistent database (Vercel Postgres, Supabase, etc.)
     
     return NextResponse.json(referral, { status: 201 });
   } catch (error) {
@@ -111,9 +83,6 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
-    // Read existing referrals
-    const referrals = await readReferrals();
-    
     // Find and update referral
     const index = referrals.findIndex((r: any) => r.id === id);
     
@@ -129,9 +98,6 @@ export async function PATCH(request: NextRequest) {
       ...updates,
       updatedAt: new Date().toISOString()
     };
-    
-    // Write back to file
-    await writeReferrals(referrals);
     
     return NextResponse.json(referrals[index]);
   } catch (error) {
