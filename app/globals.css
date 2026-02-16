@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #0a0a0a;
+  --foreground: #ffffff;
   --accent: #FF9500; /* Solar orange */
   --secondary: #888888; /* Gray for secondary text */
   --border: #222222; /* Subtle borders */
@@ -26,16 +26,10 @@
   --spacing-2xl: 4rem; /* 64px */
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ffffff;
-  }
-}
-
+/* Force dark mode always */
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: #0a0a0a;
+  color: #ffffff;
   font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
 }
 
@@ -55,11 +49,19 @@ body {
   font-size: 1.125rem;
   min-height: 3rem;
   transition: all 200ms ease-out;
+  border: none;
+  cursor: pointer;
 }
 
 .btn-primary:hover {
   transform: scale(1.02);
   filter: brightness(1.1);
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .btn-secondary {
@@ -72,6 +74,7 @@ body {
   font-size: 1.125rem;
   min-height: 3rem;
   transition: all 200ms ease-out;
+  cursor: pointer;
 }
 
 .btn-secondary:hover {
@@ -81,7 +84,8 @@ body {
 
 /* Input styles */
 input,
-textarea {
+textarea,
+select {
   background: transparent;
   border: 1px solid var(--border);
   padding: 1rem;
@@ -93,7 +97,8 @@ textarea {
 }
 
 input:focus,
-textarea:focus {
+textarea:focus,
+select:focus {
   outline: none;
   border-color: var(--accent);
   box-shadow: 0 0 0 2px rgba(255, 149, 0, 0.1);
@@ -116,4 +121,16 @@ textarea::placeholder {
 .card:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Error states */
+input.error,
+textarea.error {
+  border-color: #EF4444;
+}
+
+.error-message {
+  color: #EF4444;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
 }

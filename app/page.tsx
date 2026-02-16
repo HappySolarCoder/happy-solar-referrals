@@ -2,6 +2,14 @@
 
 import { useState } from 'react';
 
+interface FormErrors {
+  referrerName?: string;
+  referrerEmail?: string;
+  leadName?: string;
+  leadAddress?: string;
+  leadPhone?: string;
+}
+
 export default function ReferralPage() {
   const [formData, setFormData] = useState({
     referrerName: '',
@@ -13,12 +21,47 @@ export default function ReferralPage() {
     leadNotes: ''
   });
 
+  const [errors, setErrors] = useState<FormErrors>({});
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  const validateForm = (): boolean => {
+    const newErrors: FormErrors = {};
+
+    if (!formData.referrerName.trim()) {
+      newErrors.referrerName = 'Your name is required';
+    }
+
+    if (!formData.referrerEmail.trim()) {
+      newErrors.referrerEmail = 'Your email is required';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.referrerEmail)) {
+      newErrors.referrerEmail = 'Please enter a valid email';
+    }
+
+    if (!formData.leadName.trim()) {
+      newErrors.leadName = "Friend's name is required";
+    }
+
+    if (!formData.leadAddress.trim()) {
+      newErrors.leadAddress = "Friend's address is required";
+    }
+
+    if (!formData.leadPhone.trim()) {
+      newErrors.leadPhone = "Friend's phone is required";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!validateForm()) {
+      return;
+    }
+
     setLoading(true);
     setError('');
 
@@ -45,10 +88,18 @@ export default function ReferralPage() {
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [name]: value
     });
+    // Clear error for this field when user starts typing
+    if (errors[name as keyof FormErrors]) {
+      setErrors({
+        ...errors,
+        [name]: undefined
+      });
+    }
   };
 
   if (submitted) {
@@ -101,7 +152,7 @@ export default function ReferralPage() {
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6" noValidate>
           {/* Your Info Section */}
           <div className="card">
             <h2 className="text-2xl font-bold mb-6">Your Information</h2>
@@ -116,10 +167,12 @@ export default function ReferralPage() {
                   name="referrerName"
                   value={formData.referrerName}
                   onChange={handleChange}
-                  required
-                  className="w-full"
+                  className={`w-full ${errors.referrerName ? 'error' : ''}`}
                   placeholder="John Smith"
                 />
+                {errors.referrerName && (
+                  <p className="error-message">{errors.referrerName}</p>
+                )}
               </div>
               <div>
                 <label htmlFor="referrerEmail" className="block text-sm font-medium mb-2">
@@ -131,10 +184,12 @@ export default function ReferralPage() {
                   name="referrerEmail"
                   value={formData.referrerEmail}
                   onChange={handleChange}
-                  required
-                  className="w-full"
+                  className={`w-full ${errors.referrerEmail ? 'error' : ''}`}
                   placeholder="john@example.com"
                 />
+                {errors.referrerEmail && (
+                  <p className="error-message">{errors.referrerEmail}</p>
+                )}
               </div>
             </div>
           </div>
@@ -153,10 +208,12 @@ export default function ReferralPage() {
                   name="leadName"
                   value={formData.leadName}
                   onChange={handleChange}
-                  required
-                  className="w-full"
+                  className={`w-full ${errors.leadName ? 'error' : ''}`}
                   placeholder="Jane Doe"
                 />
+                {errors.leadName && (
+                  <p className="error-message">{errors.leadName}</p>
+                )}
               </div>
               <div>
                 <label htmlFor="leadAddress" className="block text-sm font-medium mb-2">
@@ -168,10 +225,12 @@ export default function ReferralPage() {
                   name="leadAddress"
                   value={formData.leadAddress}
                   onChange={handleChange}
-                  required
-                  className="w-full"
+                  className={`w-full ${errors.leadAddress ? 'error' : ''}`}
                   placeholder="123 Main St, Phoenix, AZ 85001"
                 />
+                {errors.leadAddress && (
+                  <p className="error-message">{errors.leadAddress}</p>
+                )}
               </div>
               <div>
                 <label htmlFor="leadPhone" className="block text-sm font-medium mb-2">
@@ -183,10 +242,12 @@ export default function ReferralPage() {
                   name="leadPhone"
                   value={formData.leadPhone}
                   onChange={handleChange}
-                  required
-                  className="w-full"
+                  className={`w-full ${errors.leadPhone ? 'error' : ''}`}
                   placeholder="(555) 123-4567"
                 />
+                {errors.leadPhone && (
+                  <p className="error-message">{errors.leadPhone}</p>
+                )}
               </div>
               <div>
                 <label htmlFor="leadEmail" className="block text-sm font-medium mb-2">
